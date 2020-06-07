@@ -54,7 +54,8 @@ stage_airport_codes_to_redshift = StageCSVToRedshiftOperator(
     aws_credentials_id='aws_credentials',
     table='staging_airport_codes',
     s3_bucket=SOURCE_S3_BUCKET,
-    s3_key='airport-codes_csv.csv',
+    s3_key='airport_codes.csv',
+    delimiter=';',
 )
 
 stage_us_states_mapping_to_redshift = StageCSVToRedshiftOperator(
@@ -214,11 +215,12 @@ start_operator >> [
 staged_operator >> [
     load_country_dimension_table,
     load_date_dimension_table,
-    load_port_dimension_table,
     load_us_city_dimension_table,
-    load_us_state_dimension_table,
-    load_visitor_arrival_fact_table
-] >> run_has_rows_quality_checks
+] >> load_visitor_arrival_fact_table << load_port_dimension_table
+
+load_us_city_dimension_table >> load_us_state_dimension_table >> load_port_dimension_table
+
+load_visitor_arrival_fact_table >> run_has_rows_quality_checks
 
 run_has_rows_quality_checks >> end_operator
 
