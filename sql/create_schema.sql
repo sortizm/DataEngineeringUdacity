@@ -37,6 +37,7 @@ CREATE TABLE staging_us_cities (
 
 DROP TABLE IF EXISTS staging_airport_codes;
 CREATE TABLE staging_airport_codes (
+    id INTEGER,
     identifier VARCHAR,
     type VARCHAR,
     name VARCHAR,
@@ -48,39 +49,40 @@ CREATE TABLE staging_airport_codes (
     gps_code VARCHAR,
     iata_code VARCHAR,
     local_code VARCHAR,
-    coordinates VARCHAR
-)
+    latitude VARCHAR,
+    longitude VARCHAR
+);
 
 DROP TABLE IF EXISTS staging_us_states_mapping;
 CREATE TABLE staging_us_states_mapping (
     state_code VARCHAR,
     state VARCHAR
-)
+);
 
 DROP TABLE IF EXISTS staging_countries_mapping;
 CREATE TABLE staging_countries_mapping (
     country_code VARCHAR,
     country VARCHAR
-)
+);
 
 DROP TABLE IF EXISTS staging_travel_mode_mapping;
 CREATE TABLE staging_travel_mode_mapping (
     travel_code VARCHAR,
     mode VARCHAR
-)
+);
 
 DROP TABLE IF EXISTS staging_us_ports_mapping;
 CREATE TABLE staging_us_ports_mapping (
     port_code VARCHAR,
     port VARCHAR,
     us_state_code VARCHAR
-)
+);
 
 DROP TABLE IF EXISTS staging_visa_mapping;
 CREATE TABLE staging_visa_mapping (
     visa_code VARCHAR,
     visa_type VARCHAR
-)
+);
 
 DROP TABLE IF EXISTS staging_visitor_arrivals;
 CREATE TABLE staging_visitor_arrivals (
@@ -113,7 +115,7 @@ CREATE TABLE staging_visitor_arrivals (
     admnum INTEGER,
     fltno VARCHAR,
     visatype VARCHAR
-)
+);
 
 --------------------------------------------------------------------------------
 ------------------------- DIMENSIONAL MODEL ------------------------------------
@@ -122,8 +124,8 @@ CREATE TABLE staging_visitor_arrivals (
 DROP TABLE IF EXISTS dim_port;
 CREATE TABLE dim_port (
     port_id VARCHAR(16) NOT NULL,
-    state_code VARCHAR(16) NOT NULL SORTKEY,
-    city VARCHAR(64) NOT NULL,
+    state_id INT NOT NULL SORTKEY,
+    city_id INT NOT NULL,
 	CONSTRAINT port_pkey PRIMARY KEY (port_id)
 ) DISTSTYLE ALL;
 
@@ -152,7 +154,6 @@ DROP TABLE IF EXISTS dim_us_state;
 CREATE TABLE dim_us_state (
     state_id INTEGER IDENTITY(1,1),
     state VARCHAR(64) NOT NULL,
-    median_age NUMERIC(5,2),
     male_population INTEGER,
     female_population INTEGER,
     total_population INTEGER,
@@ -198,22 +199,24 @@ CREATE TABLE dim_date (
 DROP TABLE IF EXISTS fact_visitor_arrival;
 CREATE TABLE fact_visitor_arrival (
     arrival_id INTEGER IDENTITY(1,1),
+    cic_id VARCHAR(128),
     arrival_date DATE NOT NULL,
     departure_date DATE,
+    date_added DATE,
+    allowed_stay_date DATE,
     citizenship_country_id INTEGER,
     residency_country_id INTEGER,
+    age INTEGER,
+    gender VARCHAR(16),
+    occupation_at_arrival VARCHAR(16),
+    destination_state_id INTEGER,
+    arrival_city_id INTEGER,
     arrival_port_id VARCHAR(16),
     arrival_mode VARCHAR(16),
-    destination_state_id INTEGER,
-    age INTEGER,
-    visa_type VARCHAR(16),
-    date_added DATE,
+    visa_class VARCHAR(16),
+    visa_type VARCHAR(8),
     visa_issued_department VARCHAR(16),
-    occupation_at_arrival VARCHAR(16),
-    allowed_date DATE,
-    gender VARCHAR(16),
     airline VARCHAR(32),
-    flight_number VARCHAR(16),
-    visatype VARCHAR(8)
-)
+    flight_number VARCHAR(16)
+);
 
