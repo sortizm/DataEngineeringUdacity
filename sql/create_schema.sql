@@ -195,8 +195,8 @@ CREATE TABLE dim_date (
     CONSTRAINT date_pkey PRIMARY KEY (date_id)
 ) DISTSTYLE ALL;
 
-DROP TABLE IF EXISTS fact_visitor_arrivals;
-CREATE TABLE fact_visitor_arrivals (
+DROP TABLE IF EXISTS fact_visitor_arrival;
+CREATE TABLE fact_visitor_arrival (
     arrival_id INTEGER IDENTITY(1,1),
     arrival_date DATE NOT NULL,
     departure_date DATE,
