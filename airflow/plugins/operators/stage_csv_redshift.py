@@ -9,8 +9,7 @@ class StageCSVToRedshiftOperator(BaseOperator):
     copy_sql = """
         COPY {}
         FROM '{}'
-        ACCESS_KEY_ID '{}'
-        SECRET_ACCESS_KEY '{}'
+        IAM_ROLE '{}'
         IGNOREHEADER {}
         DELIMITER '{}'
     """
@@ -18,7 +17,7 @@ class StageCSVToRedshiftOperator(BaseOperator):
     @apply_defaults
     def __init__(self,
                  redshift_conn_id="",
-                 aws_credentials_id="",
+                 iam_role_arn='',
                  table="",
                  s3_bucket='',
                  s3_key='',
@@ -28,15 +27,13 @@ class StageCSVToRedshiftOperator(BaseOperator):
         super(StageCSVToRedshiftOperator, self).__init__(*args, **kwargs)
         self.table = table
         self.redshift_conn_id = redshift_conn_id
-        self.aws_credentials_id = aws_credentials_id
+        self.iam_role_arn = iam_role_arn
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
         self.delimiter = delimiter
         self.ignore_headers = ignore_headers
 
     def execute(self, context):
-        aws_hook = AwsHook(self.aws_credentials_id)
-        credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
         self.log.info("Clearing data from destination Redshift table")
@@ -48,8 +45,7 @@ class StageCSVToRedshiftOperator(BaseOperator):
         formatted_sql = StageCSVToRedshiftOperator.copy_sql.format(
             self.table,
             s3_path,
-            credentials.access_key,
-            credentials.secret_key,
+            self.iam_role_arn,
             self.ignore_headers,
             self.delimiter,
         )
