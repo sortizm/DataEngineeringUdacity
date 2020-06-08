@@ -86,12 +86,43 @@ CREATE TABLE staging_visa_mapping (
 
 DROP TABLE IF EXISTS staging_visitor_arrivals;
 CREATE TABLE staging_visitor_arrivals (
-    id VARCHAR,
+    cicid DOUBLE PRECISION,
+    i94yr DOUBLE PRECISION,
+    i94mon DOUBLE PRECISION,
+    i94cit DOUBLE PRECISION,
+    i94res DOUBLE PRECISION,
+    i94port VARCHAR,
+    arrdate DOUBLE PRECISION,
+    i94mode DOUBLE PRECISION,
+    i94addr VARCHAR,
+    depdate DOUBLE PRECISION,
+    i94bir DOUBLE PRECISION,
+    i94visa DOUBLE PRECISION,
+    count DOUBLE PRECISION,
+    dtadfile VARCHAR,
+    visapost VARCHAR,
+    occup VARCHAR,
+    entdepa VARCHAR,
+    entdepd VARCHAR,
+    entdepu VARCHAR,
+    matflag VARCHAR,
+    biryear DOUBLE PRECISION,
+    dtaddto VARCHAR,
+    gender VARCHAR,
+    insnum VARCHAR,
+    airline VARCHAR,
+    admnum DOUBLE PRECISION,
+    fltno VARCHAR,
+    visatype VARCHAR
+);
+
+DROP TABLE IF EXISTS staging_visitor_arrivals_mapped;
+CREATE TABLE staging_visitor_arrivals_mapped (
     cicid VARCHAR,
     i94yr INTEGER,
     i94mon INTEGER,
-    i94cit INTEGER,
-    i94res INTEGER,
+    i94cit VARCHAR,
+    i94res VARCHAR,
     i94port VARCHAR,
     arrdate INTEGER,
     i94mode INTEGER,
@@ -112,7 +143,7 @@ CREATE TABLE staging_visitor_arrivals (
     gender VARCHAR,
     insnum VARCHAR,
     airline VARCHAR,
-    admnum INTEGER,
+    admnum BIGINT,
     fltno VARCHAR,
     visatype VARCHAR
 );
@@ -124,8 +155,8 @@ CREATE TABLE staging_visitor_arrivals (
 DROP TABLE IF EXISTS dim_port;
 CREATE TABLE dim_port (
     port_id VARCHAR(16) NOT NULL,
-    state_id INT NOT NULL SORTKEY,
-    city_id INT NOT NULL,
+    state_id INT SORTKEY,
+    city_id INT,
 	CONSTRAINT port_pkey PRIMARY KEY (port_id)
 ) DISTSTYLE ALL;
 
@@ -202,8 +233,6 @@ CREATE TABLE fact_visitor_arrival (
     cic_id VARCHAR(128),
     arrival_date DATE NOT NULL,
     departure_date DATE,
-    date_added DATE,
-    allowed_stay_date DATE,
     citizenship_country_id INTEGER,
     residency_country_id INTEGER,
     age INTEGER,
@@ -217,6 +246,7 @@ CREATE TABLE fact_visitor_arrival (
     visa_type VARCHAR(8),
     visa_issued_department VARCHAR(16),
     airline VARCHAR(32),
-    flight_number VARCHAR(16)
+    flight_number VARCHAR(16),
+    CONSTRAINT arrival_pkey PRIMARY KEY (arrival_id)
 );
 
