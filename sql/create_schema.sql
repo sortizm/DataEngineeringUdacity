@@ -247,6 +247,13 @@ CREATE TABLE fact_visitor_arrival (
     visa_issued_department VARCHAR(16),
     airline VARCHAR(32),
     flight_number VARCHAR(16),
-    CONSTRAINT arrival_pkey PRIMARY KEY (arrival_id)
+    CONSTRAINT arrival_pkey PRIMARY KEY (arrival_id),
+    FOREIGN KEY(arrival_date) references dim_date(date_id),
+    FOREIGN KEY(departure_date) references dim_date(date_id),
+    FOREIGN KEY(citizenship_country_id) references dim_country(country_id),
+    FOREIGN KEY(residency_country_id) references dim_country(country_id),
+    FOREIGN KEY(destination_state_id) references dim_us_state(state_id),
+    FOREIGN KEY(arrival_city_id) references dim_us_city(city_id),
+    FOREIGN KEY(arrival_port_id) references dim_port(port_id)
 );
 
