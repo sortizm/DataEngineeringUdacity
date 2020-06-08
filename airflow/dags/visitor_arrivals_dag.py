@@ -7,6 +7,7 @@ from operators import (StageToRedshiftOperator, LoadFactOperator,
 from helpers import SqlQueries
 
 SOURCE_S3_BUCKET = Variable.get('source_s3_bucket')
+IAM_ROLE_ARN = Variable.get('iam_role_arn')
 
 default_args = {
     'owner': 'Steve Ortiz',
@@ -30,7 +31,7 @@ stage_world_happiness_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_world_happiness',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_world_happiness',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='world_happiness.csv',
@@ -40,7 +41,7 @@ stage_us_cities_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_us_cities',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_us_cities',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='us-cities-demographics.csv',
@@ -51,7 +52,7 @@ stage_airport_codes_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_airport_codes',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_airport_codes',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='airport_codes.csv',
@@ -62,7 +63,7 @@ stage_us_states_mapping_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_us_states_mapping',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_us_states_mapping',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='visitor_arrivals_mappings/i94addrl.csv',
@@ -74,7 +75,7 @@ stage_countries_mapping_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_countries_mapping',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_countries_mapping',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='visitor_arrivals_mappings/i94cntyl.csv',
@@ -86,7 +87,7 @@ stage_travel_mode_mapping_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_travel_mode_mapping',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_travel_mode_mapping',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='visitor_arrivals_mappings/i94model.csv',
@@ -98,7 +99,7 @@ stage_us_ports_mapping_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_us_ports_mapping',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_us_ports_mapping',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='visitor_arrivals_mappings/i94prtl.csv',
@@ -110,7 +111,7 @@ stage_visa_mapping_to_redshift = StageCSVToRedshiftOperator(
     task_id='Stage_visa_mapping',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
+    iam_role_arn=IAM_ROLE_ARN,
     table='staging_visa_mapping',
     s3_bucket=SOURCE_S3_BUCKET,
     s3_key='visitor_arrivals_mappings/i94visa.csv',
@@ -119,13 +120,22 @@ stage_visa_mapping_to_redshift = StageCSVToRedshiftOperator(
 )
 
 stage_visitor_arrivals_to_redshift = StageToRedshiftOperator(
-    task_id='Stage_visa_mapping',
+    task_id='Stage_visitor_arrivals_mapping',
     dag=dag,
     redshift_conn_id='redshift',
-    aws_credentials_id='aws_credentials',
-    table='staging_visa_mapping',
+    iam_role_arn=IAM_ROLE_ARN,
+    table='staging_visitor_arrivals',
     s3_bucket=SOURCE_S3_BUCKET,
-    s3_key='visitor_arrivals'
+    s3_key='visitor_arrivals/2016/04/'
+)
+
+load_visitor_arrivals_mapped_staging_table = LoadFactOperator(
+    task_id='Load_fact_visitor_arrivals_mapped_staging_table',
+    dag=dag,
+    redshift_conn_id='redshift',
+    table='staging_visitor_arrivals_mapped',
+    select_query=SqlQueries.visitor_arrival_mapped_staging_table_insert,
+    truncate_insert=True
 )
 
 staged_operator = DummyOperator(task_id='All_staged', dag=dag)
@@ -210,7 +220,14 @@ start_operator >> [
     stage_us_states_mapping_to_redshift,
     stage_visa_mapping_to_redshift,
     stage_world_happiness_to_redshift,
+    stage_visitor_arrivals_to_redshift,
+    load_visitor_arrivals_mapped_staging_table,
 ] >> staged_operator
+
+load_visitor_arrivals_mapped_staging_table << [
+    stage_visitor_arrivals_to_redshift,
+    stage_countries_mapping_to_redshift,
+]
 
 staged_operator >> [
     load_country_dimension_table,
