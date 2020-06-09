@@ -84,6 +84,7 @@ The different aspects that describe the fact, such as time, and locations are th
 
 ![Dimensional model](static/Dimensional_model.PNG)
 
+_Check the [data dictionary](data_dictionary.md) for the complete list of tables and column definitions_
 
 ## ETL
 The ETL process of moving and transforming the data from its raw sources to the dimensional model consists of the following general steps:
