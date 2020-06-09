@@ -133,7 +133,8 @@ The data as it is loaded in the Redshift cluster takes 1.4GB of space. Taking in
 #### The data populates a dashboard that must be updated on a daily basis by 7am every day.
 Since the pipeline is already defined in Airflow, that can handle pipeline scheduling, it would only be required to defined the schedule, and adapt the extraction and loading step to take the execution date into account.
 #### The database needed to be accessed by 100+ people.
-I am not sure of the requests volume that the configuration I defined for the cluster can handle, but if it is not enough, it is possible to build multiple regions or multiple availability zones Redshift clusters.
+Since I am using a distributed database in this project, an increase in users and the implied increase in needed resources, can be addressed by increasing the number of nodes, or in other words scaling horizontally.
+A distributed database also means that the data can be distributed geographically, so it can be replicated to be closer to the users that are accessing it.
 
 ## Further development
 As I mentioned in some of the sections above, I made some decisions which goal was mainly simplify the task at hand, so it would not get extremely complex or laborious. As an acknowledgement of that, this is the list of possible improvements to this project.
