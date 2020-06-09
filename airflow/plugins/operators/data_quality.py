@@ -4,6 +4,19 @@ from airflow.utils.decorators import apply_defaults
 
 
 class DataQualityOperator(BaseOperator):
+    """
+    Operator to do quality checks on Redshift tables. Extends BaseOperator
+
+    Args:
+        redshift_conn_id (str): Id of the Redshift connection
+        checks ([]): List of checks to run. Each check is a dictionary with the following keys:
+            - test (str): the query to run to get a result
+            - equals (str) [optional]: a value to compare the result against. Check passes if equal
+            - not_equals (str) [optional]: a value to compare the result against. Check passes if not equal
+            Either equals or not_equals keys should be provided
+        *args: Variable argument list passed to Base Operator
+        **kwargs: Key arguments passed to Base Operator
+    """
 
     ui_color = '#89DA59'
 

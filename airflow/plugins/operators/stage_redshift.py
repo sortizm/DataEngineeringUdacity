@@ -4,6 +4,20 @@ from airflow.utils.decorators import apply_defaults
 
 
 class StageToRedshiftOperator(BaseOperator):
+    """
+    Load data from an S3 bucket into a stage table using a COPY command
+
+    Args:
+        redshift_conn_id (str): Id of the Redshift connection
+        iam_role_arn (str): IAM role ARN used to authenticate against the S3 bucket
+        table (str): name of the table where the data will be loaded
+        s3_bucket (str): name of the S3 bucket
+        s3_key (str): key of the object in the S3 bucket
+        file_format (str): format of the files being loaded
+        *args: Variable argument list passed to Base Operator
+        **kwargs: Key arguments passed to Base Operator
+    """
+
     ui_color = '#358140'
     copy_sql = """
         COPY {}

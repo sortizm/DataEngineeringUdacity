@@ -4,6 +4,17 @@ from airflow.utils.decorators import apply_defaults
 
 
 class LoadFactOperator(BaseOperator):
+    """
+    Load a fact table using a INSERT INTO SELECT query
+
+    Args:
+        redshift_conn_id (str): Id of the Redshift connection
+        table (str): name of the table where the data will be loaded
+        select_query (str): the SELECT part of the INSERT INTO SELECT query
+        truncate_insert (bool): whether to truncate the table before inserting or not
+        *args: Variable argument list passed to Base Operator
+        **kwargs: Key arguments passed to Base Operator
+    """
 
     ui_color = '#F98866'
 

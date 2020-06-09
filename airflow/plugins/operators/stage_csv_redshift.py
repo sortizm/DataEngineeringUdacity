@@ -1,10 +1,24 @@
-from airflow.contrib.hooks.aws_hook import AwsHook
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
 
 class StageCSVToRedshiftOperator(BaseOperator):
+    """
+    Load CSV data from an S3 bucket into a stage table using a COPY command
+
+    Args:
+        redshift_conn_id (str): Id of the Redshift connection
+        iam_role_arn (str): IAM role ARN used to authenticate against the S3 bucket
+        table (str): name of the table where the data will be loaded
+        s3_bucket (str): name of the S3 bucket
+        s3_key (str): key of the object in the S3 bucket
+        delimiter (str): delimiter used in the CSV file
+        ignore_headers (int): number of lines from the top of the files that are headers (to ignore them)
+        *args: Variable argument list passed to Base Operator
+        **kwargs: Key arguments passed to Base Operator
+    """
+
     ui_color = '#358140'
     copy_sql = """
         COPY {}
